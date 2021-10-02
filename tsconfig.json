@@ -4,6 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "removeComments": true,
     "declaration": true,
     "outDir": "./dist",
     "strict": true
