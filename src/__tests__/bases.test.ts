@@ -27,7 +27,7 @@ describe('BigInt values are properly encoded', () => {
   test('encodes to the expected value', () => {
     expect(encoded).toBe('Du22v03RKY');
   });
-  it('decodes back to the initial value', () => {
+  test('decodes back to the initial value', () => {
     expect(decoded).toBe(initial);
   });
 });
