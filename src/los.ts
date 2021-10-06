@@ -2,6 +2,9 @@ import * as blake2 from 'blake2';
 import ms from 'ms';
 import { randomBytes } from 'crypto';
 import { ExpirationError, SignatureError, ValidationError } from './errors';
+import {
+  b89ToDec, b89ToStr, bufToB89, decToB89, strToB89,
+} from './bases';
 
 type SupportedAlgorithm = Exclude<blake2.Blake2Algorithm, 'bypass'>;
 type Id = string | number | bigint;
@@ -76,20 +79,20 @@ export class Los {
 
     const hash: blake2.KeyedHash = this.hash.copy();
     hash.update(payload);
-    const signature = hash.digest('hex');
+    const signature = bufToB89(hash.digest());
 
     // We can save bytes for numeric IDs by converting to base-16 instead of using strings.
     // We'll need to use a flag when signing to denote whether or not the ID is numeric.
 
     const idIsNumeric = (typeof id === 'number' || typeof id === 'bigint');
 
-    const idHex = idIsNumeric
-      ? id.toString(16)
-      : Buffer.from(String(id)).toString('hex');
+    const idB89 = idIsNumeric
+      ? decToB89(BigInt(id))
+      : strToB89(String(id));
 
     const numericModeFlag = Number(idIsNumeric).toString(); // 1 if numeric, 0 if string.
 
-    return `${numericModeFlag}${idHex}.${exp.toString(16)}.${signature}`;
+    return `${numericModeFlag}${idB89}.${decToB89(exp)}.${signature}`;
   }
 
   validate(token: string, options?: Partial<ValidateOptions>): ValidationReturn {
@@ -100,20 +103,21 @@ export class Los {
     const idIsNumeric = segments[0][0] === '1';
 
     const id = idIsNumeric
-      ? BigInt(`0x${segments[0].slice(1)}`)
-      : Buffer.from(segments[0].slice(1), 'hex').toString();
+      ? b89ToDec(segments[0].slice(1))
+      : b89ToStr(segments[0].slice(1));
 
-    const expires = parseInt(segments[1], 16);
+    const expires = Number(b89ToDec(segments[1]));
 
     const reconstructedData = [id, expires, this.salt];
     const reconstructedPayload: Buffer = Buffer.from(reconstructedData.join('.'));
 
     const hash : blake2.KeyedHash = this.hash.copy();
     hash.update(reconstructedPayload);
-    const computedSignature = hash.digest('hex');
+    const computedSignature = bufToB89(hash.digest());
 
     if (computedSignature !== segments[2]) throw new SignatureError();
 
+    // This may not be necessary.
     if (Number.isNaN(expires)) throw new ValidationError();
 
     if (expires * 1000 <= Date.now() && options?.ignoreExpiration !== true) {

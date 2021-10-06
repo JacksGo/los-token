@@ -18,8 +18,10 @@ const tokenGeneratorBigInt = new Los(key, salt, {
 const tokenGeneratorDifferentKey = new Los(`${key.slice(0, -1)}0`, salt);
 const tokenGeneratorDifferentSalt = new Los(key, `${salt.slice(0, -1)}v`);
 
-const tokenPatternString = /0[0-9a-f]+.[0-9a-f]+.[0-9a-f]+/gi;
-const tokenPatternNumeric = /1[0-9a-f]+.[0-9a-f]+.[0-9a-f]+/gi;
+// Each of the sets in the patterns below is identical and reflects the legal characters in an
+// RFC6265 cookie-octet, excluding period, which is used as the delimiter.
+const tokenPatternString = /0([\w!#-+\-/:<-@[\]^`{-~]+\.){2}[\w!#-+\-/:<-@[\]^`{-~]+/gi;
+const tokenPatternNumeric = /1([\w!#-+\-/:<-@[\]^`{-~]+\.){2}[\w!#-+\-/:<-@[\]^`{-~]+/gi;
 
 describe('Sign correctly handles timestamp variations', () => {
   test('Sign succeeds with default timestamp', () => {
@@ -133,7 +135,7 @@ describe('Validate correctly handles invalid tokens', () => {
   });
 
   test('Validate fails when signature is changed', () => {
-    const alteredSignatureToken = [splitToken[0], splitToken[1], splitToken[2].replace(/[0-9a-f]/gi, 'a')].join('.');
+    const alteredSignatureToken = [splitToken[0], splitToken[1], splitToken[2].replace(/./gi, 'a')].join('.');
     expect(() => tokenGenerator.validate(alteredSignatureToken)).toThrow(SignatureError);
   });
 

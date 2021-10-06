@@ -1,6 +1,6 @@
 # los-token
 
-Los, or `los-token`, is a small, deliberately feature-light identity token system. Its primary use case is for bare-bones session validation, particularly in cases where egress data comes at a premium and every byte sent over the wire counts. Los prioritizes compactness, sacrificing the advanced functionality and customizability of JWTs in favor of simple code, fast runtimes, and small token sizes. Generated tokens contain only a user id field, an expiration field, and a hash, in that order, and take the form of period-delimited hexadecimal blocks. Los uses the [BLAKE2](https://www.blake2.net/) suite of cryptographic functions for hashing, and defaults to its 64-bit, multicore variant, BLAKE2bp.
+Los, or `los-token`, is a small, deliberately feature-light identity token system. Its primary use case is for bare-bones session validation, particularly in applications where egress data comes at a premium and every byte sent over the wire counts. Los prioritizes compactness, sacrificing the advanced functionality and customizability of JWTs in favor of simple code, short runtimes, and small token sizes. Generated tokens contain only an ID field, an expiration field, and a hash, in that order, and take the form of period-delimited blocks encoded into a base-89, cookie-compliant character set (as defined by [RFC6265](https://datatracker.ietf.org/doc/html/rfc6265#page-9)). Los uses the [BLAKE2](https://www.blake2.net/) suite of cryptographic functions for hashing, and defaults to its 64-bit, multicore variant, BLAKE2bp.
 
 # Usage
 
@@ -52,4 +52,4 @@ When validation fails, it will either use a native `Error` type or one of the fo
 - **`SignatureError`** - The hash calculated during validation doesn’t match the token’s included hash value.
 - **`ExpirationError`** - The token’s `expires` value refers to a timestamp in the past.
 
-To make checking whether an error is a Los-specific error more succinct, all Los-specific error types are extensions of a base type `LosError`, which is itself an extension of the native `Error` type.
+To aid in determining whether an error is a Los-specific error, all Los-specific error types are extensions of a base type `LosError`, which is itself an extension of the native `Error` type.
