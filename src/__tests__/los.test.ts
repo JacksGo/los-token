@@ -19,7 +19,7 @@ const tokenGeneratorDifferentKey = new Los(`${key.slice(0, -1)}0`, salt);
 const tokenGeneratorDifferentSalt = new Los(key, `${salt.slice(0, -1)}v`);
 
 // Each of the sets in the patterns below is identical and reflects the legal characters in an
-// RFC6265 cookie-octet.
+// RFC6265 cookie-octet, excluding period, which is used as the delimiter.
 const tokenPatternString = /0([\w!#-+\-/:<-@[\]^`{-~]+\.){2}[\w!#-+\-/:<-@[\]^`{-~]+/gi;
 const tokenPatternNumeric = /1([\w!#-+\-/:<-@[\]^`{-~]+\.){2}[\w!#-+\-/:<-@[\]^`{-~]+/gi;
 
